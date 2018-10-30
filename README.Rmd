@@ -16,6 +16,6 @@ Mukava kurssi aluillaan!
 1+1
 ```
 
-## Sinan GitHub
+## Sinan GitHub Diary
 
-https://github.com/SinaHulkkonen/IODS-project
+https://sinahulkkonen.github.io/IODS-project/
