@@ -1,5 +1,6 @@
 ---
 title: "IODS course project"
+author: "Sina Hulkkonen"
 output:
   html_document:
     theme: cosmo
