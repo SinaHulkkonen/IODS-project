@@ -1,0 +1,21 @@
+---
+title: "README"
+author: "Sina Hulkkonen"
+date: "10/30/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## IODS
+Mukava kurssi aluillaan!
+
+```{r, echo=TRUE}
+1+1
+```
+
+## Sinan GitHub
+
+https://github.com/SinaHulkkonen/IODS-project
