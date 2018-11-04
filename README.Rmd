@@ -1,4 +1,8 @@
 ---
+output: github_document
+---
+
+---
 title: "README"
 author: "Sina Hulkkonen"
 date: "10/30/2018"
@@ -9,7 +13,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## IODS
+## IODS 2018
 Mukava kurssi aluillaan!
 
 ```{r, echo=TRUE}
