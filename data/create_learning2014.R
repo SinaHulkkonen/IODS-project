@@ -52,4 +52,4 @@ learning2014 <- filter(learning2014, points!=0)
 
 #make a file and read it
 write.table(learning2014, file = "learning2014.csv")
-read.table("learning2014.csv", sep="\t", header=TRUE)
+read.table("learning2014.csv",  header=TRUE)
