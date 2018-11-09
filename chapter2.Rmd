@@ -1,7 +1,66 @@
-# Insert chapter 2 title here
+# IODS week2 RStudio exercise
+
+Sina Hulkkonen
+08/11/2018
 
 *Describe the work you have done this week and summarize your learning.*
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+I did all the DataCamp exercises for this week. I had huge problems with GitHub, I hope it is working now. I think I learned a lot!
+
+
+1. Data.
+```{r}
+#getting the data
+students2014<-read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt", sep=",", header=TRUE)
+
+#inspecting the structre and dimensions
+str(students2014)
+dim(students2014)
+```
+
+Students2014 is a dataset with 166 observations in 7 variables. It includes data of 166 students, their attitudes, answers on questions about their learning and the points they get.
+
+2. Graphical overwiew of the data.
+```{r}
+library(GGally)
+library(ggplot2)
+
+# getting to know the data, stratified by gender
+p <- ggpairs(students2014, mapping = aes(col=gender, alpha=0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+# draw the plot
+p
+
+```
+
+The pink colour is for females and the blue colour for males. The figures show their distributions and how the variables correlate with each other, stratified by gender. For example, it seems that majority of the variables are normally distributed and that attitude and points have the strongest correlation with each other.
+
+3. Multiple linear regression model
+```{r}
+#I chose variables attiture, stra and surf, based on the previous section
+my_model <- lm(points ~ attitude + stra + surf, data = students2014)
+summary(my_model)
+
+#stra and surf didn't correlate statistically significantly with points, so they are removed in this model
+my_model <- lm(points ~ attitude, data = students2014)
+summary(my_model)
+```
+
+Linear regression model was applied to test if there is a linear correlation with dependent variable points by explanatory variables attitude, stra and surf.
+
+4. In the first model with all of these three explanatory variables, only attitude explains points statistically significantly. In the firs model, when attitude increases by one, points increases by 3.5, in the second model when attitude increases by one, points increases by 3.4. This also tells that the proportion of points which was explained by the variables stra and surf is minimal.
+
+R-squared tells us how close the data are to the fitted regression line. It is 19% in both models, which means that they practically model this question equally good (or bad).
+
+5.
+```{r}
+# create a regression model
+my_model2 <- lm(points ~ attitude, data = students2014)
+
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+plot(my_model2, which=c(1,2,5), par(mfrow = c(2,2)))
+
+
+```
+
+Here, in Q-Q plot we see that the points are quite close to the line meaning that the erros is normally distributed (as we are assuming in linear regression). In Residuals vs Fitted values scatter plot we see that the points are allover the plot, not forming a pattern, which means that the error is not depended on explanatory variable (which is good!). Residuals vs Leverage plot we see that there are no observations standing out. This means that there are no single observations pulling the regression line somewhere (causing error). It is a good thing also.
