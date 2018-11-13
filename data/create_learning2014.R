@@ -48,7 +48,7 @@ colnames(learning2014)[2] <- "age"
 colnames(learning2014)[7]<- "points"
 
 # select rows where points is not zero
-learning2014 <- filter(learning2014, points!=0)
+learning2014 <- subset(learning2014, points!=0)
 
 #make a file and read it
 write.table(learning2014, file = "learning2014.csv")
