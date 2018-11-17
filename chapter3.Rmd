@@ -1,0 +1,117 @@
+# IODS week3 RStudio exercise
+
+Sina Hulkkonen
+17/11/2018
+
+*Describe the work you have done this week and summarize your learning.*
+
+I did all the DataCamp exercises for this week. I think even though I'm having some frustrating moments (I think we all are..?), once I realize I really learned something new, I'm really delighted I took this course. Below are the exercises for this week.
+
+#2. Reading the file
+```{r}
+library(dplyr)
+alc<-read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt", sep=",", header = TRUE)
+str(alc)
+dim(alc)
+```
+This data approach student achievement in secondary education of two Portuguese schools. The data attributes include student grades, demographic, social and school related features) and it was collected by using school reports and questionnaires. Two datasets are provided regarding the performance in two distinct subjects: Mathematics (mat) and Portuguese language (por).There are 382 observations (students) in 35 variables.
+
+#3. Hypotheses
+
+I picked up the variables age, sex, studytime and absences. I pickec those up, since we usually adjust with at leat age and sex in epidemiology, and I think alcohol consumption might affect study time and school abscences. My hypotheses are:
+1. The older the student, the more he/she consumes alcohol.
+2. Boys consume more alcohol than girls.
+3. Those cosuming more alcohol study less.
+4. Those consuming more alcohol have more school absences.
+
+#4. Exploring the hypotheses 
+```{r}
+library(ggplot2)
+library(tableone)
+
+table1<-CreateTableOne(vars = c("age", "sex", "studytime", "absences"), factorVars = c("sex"),strata = c("high_use"), data = alc)
+table1
+ 
+g3 <- ggplot(alc, aes(x = high_use, y = age, col=sex))
+g3 + geom_boxplot() + ylab("age")+ggtitle("Age by alcohol consumption and sex")
+g2 <- ggplot(alc, aes(x = high_use, y = studytime, col=sex))
+g2 + geom_boxplot() + ylab("studytime")+ggtitle("Study time by alcohol consumption and sex")
+g1 <- ggplot(alc, aes(x = high_use, y = absences, col=sex))
+g1 + geom_boxplot() + ylab("absences")+ggtitle("Student absences by alcohol consumption and sex")
+
+```
+Looking at these results, it seems that those who consume more alcohol...
+1. are the same age as those who don't BUT girls tend to consume more alcohol younger and boys older.
+2. study less (but only in girls)
+3. have more school absences, in both sexes.
+
+#5. Fitting the logistic regression model
+```{r}
+m <- glm(high_use ~ age + sex + +studytime + absences, data = alc, family = "binomial")
+summary(m)
+coef(m)
+OR <- coef(m) %>% exp
+CI<-exp(confint(m))
+cbind(OR, CI)
+```
+In the linear regression model, the odds ratios with 95% confidence for the variables I included in my study hypothesis are:
+1. age: OR=1.17 (95% CI=0.00-1.03)
+2. sex: OR= 2.23 (95% CI=1.36-3.69)
+3. study time: OR=0.64 (95% CI=0.46-0.88)
+4. school absences: OR=1.07 (95% CI=1.03-1.11)
+Interpretation: In this model, age does not predisct high alcohol usage. Male sex does predict, since its 95% CI doesn't include 1. This means, that males are approximately double the like to high alcohol consumption. Study time had OR under 1 with 95% CI excluding 1; this means that those who study more are less likely to consume more alcohol. The OR for absences was a liitle over 1 with 95% CI excluding 1, meaning that thse who have more study absences are more likely to drink alcohol. If the variable absences was divided differently (not with a range 0-93), but for example in two categories, the OR might be different (I assume larger).
+
+#6. Calculating power and error
+```{r}
+m <- glm(high_use ~ sex + +studytime + absences, data = alc, family = "binomial")
+
+probabilities <- predict(m, type = "response")
+
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+
+#alc <- mutate(alc, prediction = probability>0.5)
+#could not run this because it results in error that I asked about in IODS couse discussion forum
+
+table(high_use = alc$high_use, prediction = alc$probability>0.5)
+      
+# initialize a plot of 'high_use' versus 'probability' in 'alc'
+g <- ggplot(alc, aes(x = probability, y = high_use, col=alc$probability>0.5))
+
+# define the geom as points and draw the plot
+g+geom_point()
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$probability>0.5)%>%prop.table()%>%addmargins()
+
+#defining the function
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = alc$high_use, prob = alc$probability)
+```
+Interpretation: If the model I built predicts that it is more probable that a student does consume high amount of alcohol, it can find 27 out of 85+27=112 students who really consume hight amount of alcohol. This means that if I had to decide given by these three variables included in the model, this is the odds that I'd succeed in guessing if they consume a lot of alcohol.
+
+The total proportion of inaccurately classified individuals (= the training error) is 24.6%. Manually this is calculated (9+85)/(261+85+9+27) resulting the same as it should be. I think the model did surprisingly well!
+
+#7. Bonus: 10-fold cross-validation of the model
+```{r}
+# define a loss function (average prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+The prediction error in my model is  26.2% (in the DataCamp exercise the error was 25.3%, actually). My model has bigger error, meaning that it is worse than the one used in DataCamp exercises by this means.
+
+I didn't complete the axtra bonus exercise.
