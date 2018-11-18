@@ -65,3 +65,10 @@ glimpse(alc)
 alc <- mutate(alc, alc_use = (Dalc + Walc) / 2)
 # define a new logical column 'high_use'
 alc <- mutate(alc, high_use = alc_use > 2)
+
+#glimpse at the joined and modified data
+glimpse(alc)
+
+#make a file and read it
+write.table(alc, file = "create_alc.R")
+read.table("create_alc.R",  header=TRUE)
